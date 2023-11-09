@@ -115,7 +115,7 @@ const float3 cg::world::camera::get_direction() const
 {
 	return float3{sin(theta) * cos(phi),
 				  sin(phi),
-				  cos(theta) * cos(phi)};
+				  -cos(theta) * cos(phi)};
 }
 
 const float3 cg::world::camera::get_right() const
