@@ -47,28 +47,26 @@ void cg::renderer::ray_tracing_renderer::render()
 
 	std::random_device random_device;
 	std::mt19937 random_generator(random_device());
-	std::uniform_real_distribution<float> uniform_distribution(-1.f, 1.f);
+	std::uniform_real_distribution<float> uni_dist(-1.f, 1.f);
 
 	raytracer->closest_hit_shader = [&](const ray& ray, payload& payload,
 										const triangle<cg::vertex>& triangle,
 										size_t depth) {
 		float3 position = ray.position + ray.direction * payload.t;
-		float3 normal = normalize(payload.bary.x * triangle.na +
+		float3 normal = payload.bary.x * triangle.na +
 								  payload.bary.y * triangle.nb +
-								  payload.bary.z * triangle.nc);
+								  payload.bary.z * triangle.nc;
 
 		float3 res_color = triangle.emissive;
 
-		float3 rand_direction{
-				uniform_distribution(random_generator),
-				uniform_distribution(random_generator),
-				uniform_distribution(random_generator)};
-
-		if (dot(normal, rand_direction) < 0.f) {
+		float3 rand_direction{uni_dist(random_generator),
+				uni_dist(random_generator),
+				uni_dist(random_generator)};
+		if (dot(rand_direction, normal) < 0.f) {
 			rand_direction = -rand_direction;
 		}
 
-		cg::renderer::ray to_rand_direction(position, random_direction);
+		cg::renderer::ray to_rand_direction(position, rand_direction);
 		auto next_payload = raytracer->trace_ray(to_rand_direction, depth);
 
 		res_color += next_payload.color.to_float3() * triangle.diffuse *
